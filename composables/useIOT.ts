@@ -1,90 +1,69 @@
-// composables/useIOT.ts
-import { USBManager, SerialManager } from '@mastashake08/web-iot';
-
 export function useIOT() {
-  const usbManager = new USBManager();
-  const serialManager = new SerialManager();
-  let device = null;
+  let directoryHandle: FileSystemDirectoryHandle | null = null;
 
   /**
-   * Connect to a device using USB or Serial.
+   * Request access to the RP2350 directory.
    */
   const connect = async () => {
     try {
-      // Try connecting via USB
-      const usbDevices = await usbManager.requestDevice();
-      if (usbDevices.length > 0) {
-        device = usbDevices[0];
-        await usbManager.connectDevice(device);
-        console.log('Connected to USB device:', device);
-        return;
-      }
-
-      // If no USB devices, try Serial
-      const serialPorts = await serialManager.requestPort();
-      if (serialPorts.length > 0) {
-        device = serialPorts[0];
-        await serialManager.connectPort(device);
-        console.log('Connected to Serial device:', device);
-        return;
-      }
-
-      throw new Error('No devices available to connect.');
+      console.log('Requesting directory access...');
+      directoryHandle = await window.showDirectoryPicker();
+      console.log('Directory selected:', directoryHandle);
+      return directoryHandle;
     } catch (error) {
-      console.error('Failed to connect to device:', error);
+      console.error('Failed to access directory:', error);
+      return null;
     }
   };
 
   /**
-   * Write binary data to the connected device.
+   * Write a binary file (.uf2 or .bin) to the connected directory with progress tracking.
    * @param {File} file - The binary file to upload.
+   * @param {Function} onProgress - Callback for tracking upload progress.
    */
-  const uploadBinary = async (file: File) => {
-    if (!device) {
-      console.error('No device connected.');
+  const uploadBinary = async (file: File, onProgress = (uploaded: number, total: number) => {}) => {
+    if (!directoryHandle) {
+      console.error('No directory selected. Please connect first.');
       return;
     }
 
     try {
-      // Read file content as ArrayBuffer
-      const fileData = await file.arrayBuffer();
-      const data = new Uint8Array(fileData);
+      console.log('Uploading file:', file.name);
 
-      if (usbManager.isConnected(device)) {
-        // Write data to the device over USB
-        await usbManager.writeToDevice(device, data);
-        console.log('File successfully uploaded via USB.');
-      } else if (serialManager.isConnected(device)) {
-        // Write data to the device over Serial
-        await serialManager.writeToPort(device, data);
-        console.log('File successfully uploaded via Serial.');
-      } else {
-        console.error('No valid connection to write data.');
+      // Create a file handle in the directory
+      const fileHandle = await directoryHandle.getFileHandle(file.name, {
+        create: true,
+      });
+
+      // Write to the file with progress tracking
+      const writableStream = await fileHandle.createWritable();
+      const fileData = await file.arrayBuffer();
+      const totalBytes = fileData.byteLength;
+      const chunkSize = 64 * 1024; // 64KB chunks
+      let uploadedBytes = 0;
+
+      for (let i = 0; i < totalBytes; i += chunkSize) {
+        const chunk = fileData.slice(i, i + chunkSize);
+        await writableStream.write(chunk);
+        uploadedBytes += chunk.byteLength;
+
+        // Call the progress callback
+        onProgress(uploadedBytes, totalBytes);
       }
+
+      await writableStream.close();
+      console.log('File successfully written to directory.');
     } catch (error) {
-      console.error('Failed to upload binary:', error);
+      console.error('Failed to upload file:', error);
     }
   };
 
   /**
-   * Disconnect from the currently connected device.
+   * Disconnect by clearing the directory handle.
    */
-  const disconnect = async () => {
-    try {
-      if (usbManager.isConnected(device)) {
-        await usbManager.disconnectDevice(device);
-        console.log('USB device disconnected.');
-      } else if (serialManager.isConnected(device)) {
-        await serialManager.disconnectPort(device);
-        console.log('Serial device disconnected.');
-      } else {
-        console.error('No device connected to disconnect.');
-      }
-
-      device = null;
-    } catch (error) {
-      console.error('Failed to disconnect device:', error);
-    }
+  const disconnect = () => {
+    directoryHandle = null;
+    console.log('Disconnected from directory.');
   };
 
   return {
