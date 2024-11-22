@@ -1,0 +1,20 @@
+{
+  "name": "shake-rp2350",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@mastashake08/web-iot": "^1.4.1",
+    "nuxt": "^3.14.1592"
+  },
+  "devDependencies": {
+    "@nuxtjs/google-adsense": "^3.0.0",
+    "@nuxtjs/tailwindcss": "^6.12.2"
+  }
+}
