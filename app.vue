@@ -43,31 +43,62 @@
         </div>
       </div>
 
-      <!-- Inspect RP2350 Section -->
-      <div class="mt-8 p-6 bg-white shadow-md rounded-lg">
-  <h2 class="text-xl font-bold mb-4">Inspect RP2350</h2>
-  <button
-    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4"
-    @click="inspectDevice"
-  >
-    Inspect RP2350
-  </button>
+      <div class="p-6 bg-white shadow-md rounded-lg">
+        <h2 class="text-xl font-bold mb-4">Inspect RP2350</h2>
+        <button
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4"
+          @click="inspectDevice"
+        >
+          Inspect RP2350
+        </button>
 
-  <!-- Device Info -->
-  <div v-if="deviceInfo">
-    <p class="font-bold">Device Information:</p>
-    <ul class="list-disc list-inside space-y-2 mt-2">
-      <li><b>Product Name:</b> {{ deviceInfo.productName }}</li>
-      <li><b>Vendor ID:</b> {{ deviceInfo.vendorId }}</li>
-      <li><b>Product ID:</b> {{ deviceInfo.productId }}</li>
-    </ul>
-  </div>
-  <p v-else class="text-gray-500">No device information available. Connect and inspect the RP2350.</p>
+        <!-- Device Info -->
+        <div v-if="deviceInfo">
+          <p class="font-bold">Device Information:</p>
+          <ul class="list-disc list-inside space-y-2 mt-2">
+            <li><b>Product Name:</b> {{ deviceInfo.productName || 'Unknown' }}</li>
+            <li><b>Manufacturer:</b> {{ deviceInfo.manufacturerName || 'Unknown' }}</li>
+            <li><b>Serial Number:</b> {{ deviceInfo.serialNumber || 'Unknown' }}</li>
+            <li><b>Vendor ID:</b> {{ deviceInfo.vendorId }}</li>
+            <li><b>Product ID:</b> {{ deviceInfo.productId }}</li>
+          </ul>
+        </div>
+        <p v-else class="text-gray-500">No device information available. Click "Inspect RP2350" to begin.</p>
 
-  <!-- Fallback Message -->
-  <p v-if="fallbackMessage" class="text-gray-500 mt-4">{{ fallbackMessage }}</p>
-</div>
-
+        <!-- Configurations and Interfaces -->
+        <div v-if="configurations.length" class="mt-6">
+         <p class="font-bold">Device Configurations:</p>
+           <div v-for="(config, index) in configurations" :key="index" class="mt-4">
+            <p><b>Configuration {{ index + 1 }}:</b></p>
+           <ul class="list-disc list-inside space-y-2">
+              <li><b>Configuration Value:</b> {{ config.configurationValue }}</li>
+              <li><b>Interfaces:</b></li>
+              <ul class="list-inside ml-6">
+                <li
+                  v-for="(x, index2) in config.interfaces"
+                  :key="index2"
+                  class="space-y-1"
+                >
+                  <b>Interface {{ index2 + 1 }}</b>
+                  <ul class="list-disc list-inside ml-6">
+                    <li><b>Interface Number:</b> {{ x.interfaceNumber }}</li>
+                    <li><b>Alternate Setting:</b> {{ x.alternateSetting }}</li>
+                    <li>
+                      <b>Endpoints:</b>
+                      <ul class="list-inside ml-6">
+                        <li v-for="(endpoint, eIndex) in x.endpoints" :key="eIndex">
+                          <b>Endpoint {{ eIndex + 1 }}:</b>
+                          {{ endpoint.type }} ({{ endpoint.direction }})
+                        </li>
+                      </ul>
+                    </li>
+                  </ul> 
+                </li> 
+              </ul> 
+            </ul> 
+          </div> 
+        </div> 
+      </div>
     </main>
 
     <!-- Footer -->
@@ -106,53 +137,51 @@
 <script setup>
 import { ref } from 'vue';
 const deviceInfo = ref(null);
-const fallbackMessage = ref('');
+const configurations = ref([]);
 
 /**
- * Inspect the connected RP2350 device using WebHID or fallback to File System Access API.
+ * Inspect the RP2350 using WebUSB API.
  */
 const inspectDevice = async () => {
   try {
-    // Attempt WebHID inspection
-    const devices = await navigator.hid.requestDevice({
-      filters: [{ vendorId: 0x2E8A }], // Replace with the actual Vendor ID
+    // Request a USB device matching the RP2350 Vendor ID
+    const device = await navigator.usb.requestDevice({
+      filters: [{ vendorId: 0x2E8A }], // Replace with the actual Vendor ID for RP2350
     });
 
-    if (devices.length === 0) {
-      fallbackMessage.value = 'No RP2350 device found via WebHID. Falling back to file system access.';
-      console.error(fallbackMessage.value);
-      fallbackToFilesystem();
+    if (!device) {
+      console.error('No RP2350 device found.');
       return;
     }
 
-    const device = devices[0];
+    // Open the device to access configurations
     await device.open();
-
+    console.log(device.configurations)
+    // Fetch basic device details
     deviceInfo.value = {
-      productName: device.productName || 'Unknown Product',
-      vendorId: device.vendorId.toString(16),
-      productId: device.productId.toString(16),
+      productName: device.productName,
+      manufacturerName: device.manufacturerName,
+      serialNumber: device.serialNumber,
+      vendorId: `0x${device.vendorId.toString(16)}`,
+      productId: `0x${device.productId.toString(16)}`,
     };
 
-    console.log('Device Information:', deviceInfo.value);
-  } catch (error) {
-    console.error('WebHID inspection failed. Falling back to filesystem access.', error);
-    fallbackToFilesystem();
-  }
-};
+    // Fetch configurations and interfaces
+    configurations.value = device.configurations.map((config) => ({
+      configurationValue: config.configurationValue,
+      interfaces: config.interfaces.map((iface) => ({
+        interfaceNumber: iface.interfaceNumber,
+        alternateSetting: iface.alternateSetting,
+        endpoints: iface.alternates[0].endpoints.map((ep) => ({
+          type: ep.type,
+          direction: ep.direction,
+        })),
+      })),
+    }));
 
-/**
- * Fallback to File System Access API to inspect the RP2350.
- */
-const fallbackToFilesystem = async () => {
-  try {
-    const directoryHandle = await window.showDirectoryPicker();
-    fallbackMessage.value = `Connected to filesystem: ${directoryHandle.name}`;
-    console.log('Directory Handle:', directoryHandle);
+    console.log('Device Configurations:', configurations.value);
   } catch (error) {
-    fallbackMessage.value = 'Failed to access filesystem.';
-    console.error(fallbackMessage.value, error);
+    console.error('Failed to inspect device:', error);
   }
 };
 </script>
-
