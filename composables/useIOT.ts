@@ -7,7 +7,7 @@ export function useIOT() {
   const connect = async () => {
     try {
       console.log('Requesting directory access...');
-      directoryHandle = await window.showDirectoryPicker();
+      directoryHandle = await window.showDirectoryPicker({mode: 'readwrite'});
       console.log('Directory selected:', directoryHandle);
       return directoryHandle;
     } catch (error) {

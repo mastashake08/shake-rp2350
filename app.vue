@@ -3,8 +3,8 @@
     <!-- Header -->
     <header class="bg-blue-600 text-white py-4 px-8 flex justify-between items-center">
       <h1 class="text-2xl font-bold">Shake RP2350</h1>
-      <!-- Social Links -->
-      <div class="flex space-x-4">
+       <!-- Social Links -->
+       <div class="flex space-x-4">
         <a href="https://github.com/mastashake08" target="_blank" class="hover:opacity-75">
           <img src="/github-icon.svg" alt="GitHub" class="h-6 w-6" />
         </a>
@@ -32,8 +32,7 @@
                 <li>OR click the <b>"Upload File"</b> button to select a file from your computer.</li>
               </ul>
             </li>
-            <li>Wait for the upload to complete. A progress bar will show the upload status.</li>
-            <li>Once the upload is complete, check the RP2350 filesystem for the uploaded file.</li>
+            <li>Inspect the connected device details using the <b>"Inspect RP2350"</b> section below.</li>
           </ol>
           <p class="mt-4 text-gray-500">Note: Ensure your device is mounted and the site is served over HTTPS.</p>
         </div>
@@ -43,6 +42,32 @@
           <FileUploader />
         </div>
       </div>
+
+      <!-- Inspect RP2350 Section -->
+      <div class="mt-8 p-6 bg-white shadow-md rounded-lg">
+  <h2 class="text-xl font-bold mb-4">Inspect RP2350</h2>
+  <button
+    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4"
+    @click="inspectDevice"
+  >
+    Inspect RP2350
+  </button>
+
+  <!-- Device Info -->
+  <div v-if="deviceInfo">
+    <p class="font-bold">Device Information:</p>
+    <ul class="list-disc list-inside space-y-2 mt-2">
+      <li><b>Product Name:</b> {{ deviceInfo.productName }}</li>
+      <li><b>Vendor ID:</b> {{ deviceInfo.vendorId }}</li>
+      <li><b>Product ID:</b> {{ deviceInfo.productId }}</li>
+    </ul>
+  </div>
+  <p v-else class="text-gray-500">No device information available. Connect and inspect the RP2350.</p>
+
+  <!-- Fallback Message -->
+  <p v-if="fallbackMessage" class="text-gray-500 mt-4">{{ fallbackMessage }}</p>
+</div>
+
     </main>
 
     <!-- Footer -->
@@ -73,12 +98,61 @@
         </div>
 
         <!-- Branding -->
-        <p>© 2024 Shake RP2350. Built by <a href="https://jyroneparker.com" target="_blank">Mastashake08.</a></p>
+        <p>© 2024 Shake RP2350. Built by <a href="https://jyroneparker.com" target="_blank">Mastashake.</a></p>
       </div>
     </footer>
   </div>
 </template>
-
 <script setup>
-import FileUploader from '~/components/FileUploader.vue';
+import { ref } from 'vue';
+const deviceInfo = ref(null);
+const fallbackMessage = ref('');
+
+/**
+ * Inspect the connected RP2350 device using WebHID or fallback to File System Access API.
+ */
+const inspectDevice = async () => {
+  try {
+    // Attempt WebHID inspection
+    const devices = await navigator.hid.requestDevice({
+      filters: [{ vendorId: 0x2E8A }], // Replace with the actual Vendor ID
+    });
+
+    if (devices.length === 0) {
+      fallbackMessage.value = 'No RP2350 device found via WebHID. Falling back to file system access.';
+      console.error(fallbackMessage.value);
+      fallbackToFilesystem();
+      return;
+    }
+
+    const device = devices[0];
+    await device.open();
+
+    deviceInfo.value = {
+      productName: device.productName || 'Unknown Product',
+      vendorId: device.vendorId.toString(16),
+      productId: device.productId.toString(16),
+    };
+
+    console.log('Device Information:', deviceInfo.value);
+  } catch (error) {
+    console.error('WebHID inspection failed. Falling back to filesystem access.', error);
+    fallbackToFilesystem();
+  }
+};
+
+/**
+ * Fallback to File System Access API to inspect the RP2350.
+ */
+const fallbackToFilesystem = async () => {
+  try {
+    const directoryHandle = await window.showDirectoryPicker();
+    fallbackMessage.value = `Connected to filesystem: ${directoryHandle.name}`;
+    console.log('Directory Handle:', directoryHandle);
+  } catch (error) {
+    fallbackMessage.value = 'Failed to access filesystem.';
+    console.error(fallbackMessage.value, error);
+  }
+};
 </script>
+
