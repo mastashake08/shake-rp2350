@@ -1,5 +1,8 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
+  app: {
+    baseURL: '/shake-rp2350/', // Replace <repo-name> with your GitHub repository name
+  },
   modules: ['@nuxtjs/google-adsense', '@nuxtjs/tailwindcss'],
 
   'google-adsense': {
