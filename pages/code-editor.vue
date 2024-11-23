@@ -1,5 +1,6 @@
 <template>
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen bg-gray-100 flex flex-col">
+      <!-- Header -->
        <!-- Header -->
        <header class="bg-blue-600 text-white py-4 px-8 flex justify-between items-center">
         <h1 class="text-2xl font-bold">Shake RP2350</h1>
@@ -20,12 +21,20 @@
           </a>
         </div>
       </header>
+  
+      <!-- Main Content -->
       <main class="flex-1 container mx-auto py-8">
-        <slot />
+        <CodeEditor />
       </main>
+  
+      <!-- Footer -->
       <footer class="bg-gray-800 text-white py-4 text-center">
-        © 2024 Shake RP2350
+        <p>© 2024 RP2350 Programming App. Built by Mastashake08.</p>
       </footer>
     </div>
   </template>
+  
+  <script setup>
+  import CodeEditor from '~/components/CodeEditor.vue';
+  </script>
   

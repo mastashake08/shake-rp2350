@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@mastashake08/web-iot": "^1.4.1",
+    "micropython": "^1.1.8",
+    "monaco-editor": "^0.52.0",
     "nuxt": "^3.14.1592"
   },
   "devDependencies": {
