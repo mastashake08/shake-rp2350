@@ -2,12 +2,12 @@
   <div class="min-h-screen flex flex-col bg-black text-white">
     <!-- Shared Header -->
     <header class="bg-gradient-to-r from-purple-800 via-pink-600 to-blue-600 text-white py-4 px-8 flex justify-between items-center shadow-lg">
-      <h1 class="text-3xl font-extrabold neon-text"><a href="/">Shake RP2350</a></h1>
+      <h1 class="text-3xl font-extrabold neon-text"><a href="/shake-rp2350/">Shake RP2350</a></h1>
       <nav class="flex space-x-6">
-        <a href="/" class="hover:underline text-neon-green">Home</a>
-        <a href="/about" class="hover:underline text-neon-purple">About Project</a>
-        <a href="/code-editor" class="hover:underline text-neon-pink">Code Editor</a>
-        <a href="/about-the-dev" class="hover:underline text-neon-blue">About Mastashake</a>
+        <a href="/shake-rp2350/" class="hover:underline text-neon-green">Home</a>
+        <a href="/shake-rp2350/about" class="hover:underline text-neon-purple">About Project</a>
+        <a href="/shake-rp2350/code-editor" class="hover:underline text-neon-pink">Code Editor</a>
+        <a href="/shake-rp2350/about-the-dev" class="hover:underline text-neon-blue">About Mastashake</a>
       </nav>
       <!-- Social Links -->
       <div class="flex space-x-4">
