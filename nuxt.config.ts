@@ -26,5 +26,10 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2024-11-21',
-  ssr: false
+  ssr: false,
+  vite: {
+    build: {
+      target: 'esnext', // Use modern JavaScript features
+    },
+  },
 });

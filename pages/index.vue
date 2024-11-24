@@ -160,6 +160,8 @@
   
       // Open the device to access configurations
       await device.open();
+      await device.selectConfiguration(1);
+      await device.claimInterface(1);
       console.log(device.configurations)
       // Fetch basic device details
       deviceInfo.value = {
