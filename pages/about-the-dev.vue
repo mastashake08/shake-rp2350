@@ -2,6 +2,12 @@
     <div class="min-h-screen bg-black text-white flex flex-col py-8 px-6">
       <!-- Main Content -->
       <div class="p-6 bg-gray-900 shadow-lg rounded-lg neon-border">
+        <!-- Headshot Placeholder -->
+        <div class="flex justify-center mb-6">
+            <img src="/headshot.jpg" alt="Jyrone Parker" class="object-cover w-128 h-128 rounded-lg shadow-md" />
+        </div>
+
+  
         <h2 class="text-3xl font-bold mb-4 text-neon-green">Meet Jyrone Parker (Mastashake)</h2>
         <p class="text-gray-300 leading-7">
           Hello! I'm <strong class="text-neon-green">Jyrone Parker</strong>, also known as Mastashake, a passionate full-stack developer, cloud architect, and IoT enthusiast. 
@@ -20,6 +26,11 @@
         <!-- Social Media Links -->
         <h3 class="text-2xl font-bold mt-6 mb-4 text-neon-blue">Follow Me</h3>
         <ul class="list-disc list-inside space-y-2 text-gray-300">
+          <li>
+            <a href="https://youtube.com/c/jyroneparker" target="_blank" class="text-neon-red hover:underline">
+              YouTube: @jyroneparker
+            </a>
+          </li>
           <li>
             <a href="https://twitter.com/jyroneparker" target="_blank" class="text-neon-pink hover:underline">
               Twitter: @jyroneparker
@@ -76,6 +87,10 @@
   .text-neon-purple {
     color: #a349a4;
     text-shadow: 0 0 5px #a349a4, 0 0 10px #a349a4;
+  }
+  .text-neon-red {
+    color: red;
+    text-shadow: 0 0 5px red, 0 0 10px red;
   }
   .bg-neon-green {
     background-color: #39ff14;

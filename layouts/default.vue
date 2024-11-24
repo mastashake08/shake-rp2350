@@ -35,7 +35,7 @@
         <a
               href="https://buy.stripe.com/6oEbLI1bf6eKbXqcNk"
               target="_blank"
-             
+              class="ml4"
             >
               Support with Stripe
             </a></p>
