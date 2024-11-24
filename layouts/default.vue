@@ -71,3 +71,28 @@ body {
   font-family: 'Courier New', Courier, monospace;
 }
 </style>
+
+<script setup lang="ts">
+useSchemaOrg([
+  // primary breadcrumb
+  defineBreadcrumb({
+    itemListElement: [
+      // item is the url and will be resolved to the absolute url
+      { name: 'Home', item: '/' },
+      { name: 'About', item: '/about' },
+      { name: 'Code Editor', item: '/code-editor' },
+      // item is not required for the last list element
+      { name: 'About Mastashake' },
+    ]
+  }),
+  defineSoftwareApp({
+      name: 'Shake RP2350',
+      operatingSystem: 'WEB',
+      applicationCategory: 'DeveloperApplication',
+      aggregateRating: {
+        ratingValue: '4.6',
+        ratingCount: 8864,
+      },
+    })
+])
+</script>
