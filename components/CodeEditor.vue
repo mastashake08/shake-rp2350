@@ -1,21 +1,21 @@
 <template>
-    <div>
-      <h2 class="text-xl font-bold mb-4">Write and Run MicroPython Code</h2>
+    <div class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border">
+      <h2 class="text-2xl font-bold mb-4 neon-text-green">Write and Run MicroPython Code</h2>
   
       <!-- Code Editor -->
-      <div id="editor" class="h-96 border rounded-md"></div>
+      <div id="editor" class="h-96 border border-neon-blue rounded-md shadow-inner bg-black"></div>
   
       <!-- Connection and Execution -->
-      <div class="mt-4">
+      <div class="mt-6">
         <button
-          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          class="bg-neon-blue text-black px-6 py-2 rounded-md font-bold shadow-md hover:shadow-lg hover:bg-blue-400"
           @click="connectToDevice"
         >
           Connect to RP2350
         </button>
         <button
           v-if="isConnected"
-          class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 ml-2"
+          class="bg-neon-green text-black px-6 py-2 rounded-md font-bold shadow-md hover:shadow-lg hover:bg-green-400 ml-4"
           @click="sendCode"
         >
           Send Code
@@ -23,12 +23,36 @@
       </div>
   
       <!-- Output Display -->
-      <div v-if="output" class="mt-4 p-4 bg-gray-100 border rounded-md">
-        <h3 class="text-lg font-semibold">Output</h3>
+      <div
+        v-if="output"
+        class="mt-6 p-4 border border-neon-pink bg-black rounded-md shadow-inner text-gray-300"
+      >
+        <h3 class="text-lg font-semibold text-neon-pink">Output</h3>
         <pre class="whitespace-pre-wrap">{{ output }}</pre>
       </div>
     </div>
   </template>
+  
+  <style scoped>
+  /* Neon Colors */
+  .neon-text-green {
+    color: #39ff14;
+    text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14;
+  }
+  .border-neon-blue {
+    border-color: #0ff;
+  }
+  .border-neon-pink {
+    border-color: #ff6ec7;
+  }
+  .bg-neon-blue {
+    background-color: #0ff;
+  }
+  .bg-neon-green {
+    background-color: #39ff14;
+  }
+  </style>
+  
   
   <script setup>
   import { onMounted, ref } from 'vue';
