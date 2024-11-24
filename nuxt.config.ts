@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   app: {
     baseURL: '/shake-rp2350/', // Replace <repo-name> with your GitHub repository name
   },
-  modules: ['@nuxtjs/google-adsense', '@nuxtjs/tailwindcss'],
+  modules: ['@nuxtjs/google-adsense', '@nuxtjs/tailwindcss', '@vite-pwa/nuxt'],
 
   'google-adsense': {
     id: 'ca-pub-xxxxxxxxxxxxxxxx' // Replace with your Google AdSense ID
@@ -26,5 +26,10 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2024-11-21',
-  ssr: false
+  ssr: false,
+  vite: {
+    build: {
+      target: 'esnext', // Use modern JavaScript features
+    },
+  },
 });

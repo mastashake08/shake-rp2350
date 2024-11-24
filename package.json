@@ -12,10 +12,14 @@
   },
   "dependencies": {
     "@mastashake08/web-iot": "^1.4.1",
+    "@micropython/micropython-webassembly-pyscript": "^1.24.0",
+    "micropython": "^1.1.8",
+    "monaco-editor": "^0.52.0",
     "nuxt": "^3.14.1592"
   },
   "devDependencies": {
     "@nuxtjs/google-adsense": "^3.0.0",
-    "@nuxtjs/tailwindcss": "^6.12.2"
+    "@nuxtjs/tailwindcss": "^6.12.2",
+    "@vite-pwa/nuxt": "^0.10.6"
   }
 }

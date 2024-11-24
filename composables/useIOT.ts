@@ -7,7 +7,9 @@ export function useIOT() {
   const connect = async () => {
     try {
       console.log('Requesting directory access...');
-      directoryHandle = await window.showDirectoryPicker({mode: 'readwrite'});
+      directoryHandle = await window.showDirectoryPicker({
+        id: 'RP2350',
+        mode: 'readwrite'});
       console.log('Directory selected:', directoryHandle);
       return directoryHandle;
     } catch (error) {
@@ -31,7 +33,10 @@ export function useIOT() {
       console.log('Uploading file:', file.name);
 
       // Create a file handle in the directory
-      const fileHandle = await directoryHandle.getFileHandle(file.name, {
+      const newDir = await directoryHandle.getDirectoryHandle('BIN', {
+        create: true
+      })
+      const fileHandle = await newDir.getFileHandle(file.name, {
         create: true,
       });
 
