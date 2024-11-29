@@ -7,7 +7,7 @@
         <h2 class="text-2xl font-bold mb-4 text-neon-green">How to Use</h2>
         <ol class="list-decimal list-inside space-y-4 text-gray-300">
           <li>
-            Click the <b>"Connect to RP2350"</b> button to connect to your device.
+            Click the <b>"Connect to RP2350"</b> button to connect to your device.value.
           </li>
           <li>
             Grant access to the RP2350's filesystem (its mount point).
@@ -102,37 +102,37 @@
   import { ref } from 'vue';
   const deviceInfo = ref(null);
   const configurations = ref([]);
-  
+  const device = ref(null)
   /**
    * Inspect the RP2350 using WebUSB API.
    */
   const inspectDevice = async () => {
     try {
       // Request a USB device matching the RP2350 Vendor ID
-      const device = await navigator.usb.requestDevice({
+      device.value= await navigator.usb.requestDevice({
         filters: [{ vendorId: 0x2E8A }], // Replace with the actual Vendor ID for RP2350
       });
   
-      if (!device) {
+      if (!device.value) {
         console.error('No RP2350 device found.');
         return;
       }
   
       // Open the device to access configurations
-      await device.open();
-      await device.selectConfiguration(1);
-      await device.claimInterface(1);
+      await device.value.open();
+      await device.value.selectConfiguration(1);
+      await device.value.claimInterface(1);
       // Fetch basic device details
       deviceInfo.value = {
-        productName: device.productName,
-        manufacturerName: device.manufacturerName,
-        serialNumber: device.serialNumber,
-        vendorId: `0x${device.vendorId.toString(16)}`,
-        productId: `0x${device.productId.toString(16)}`,
+        productName: device.value.productName,
+        manufacturerName: device.value.manufacturerName,
+        serialNumber: device.value.serialNumber,
+        vendorId: `0x${device.value.vendorId.toString(16)}`,
+        productId: `0x${device.value.productId.toString(16)}`,
       };
   
       // Fetch configurations and interfaces
-      configurations.value = device.configurations.map((config) => ({
+      configurations.value = device.value.configurations.map((config) => ({
         configurationValue: config.configurationValue,
         interfaces: config.interfaces.map((iface) => ({
           interfaceNumber: iface.interfaceNumber,
@@ -149,6 +149,54 @@
       console.error('Failed to inspect device:', error);
     }
   };
+   /**
+   * Parse a .uf2 file and extract blocks.
+   * @param {ArrayBuffer} fileBuffer - The UF2 file as an ArrayBuffer.
+   * @returns {Uint8Array[]} - An array of UF2 blocks.
+   */
+   const parseUF2File = (fileBuffer) => {
+    const blocks = [];
+    const view = new DataView(fileBuffer);
+    const blockSize = 512; // UF2 blocks are 512 bytes each.
+
+    for (let offset = 0; offset < fileBuffer.byteLength; offset += blockSize) {
+      const block = new Uint8Array(fileBuffer, offset, blockSize);
+      blocks.push(block);
+    }
+
+    return blocks;
+  };
+
+  /**
+   * Upload a .uf2 file to the RP2350.
+   * @param {File} uf2File - The .uf2 file to upload.
+   */
+  const uploadUF2 = async (uf2File) => {
+    if (!device.value) {
+      console.error("Device is not connected.");
+      return;
+    }
+
+    try {
+      // Read the .uf2 file and parse blocks.
+      const fileBuffer = await uf2File.arrayBuffer();
+      const blocks = parseUF2File(fileBuffer);
+
+      console.log(`Parsed ${blocks.length} UF2 blocks.`);
+
+      // Send each block to the device.
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
+        await device.value.transferOut(1, block); // Endpoint 1 for writing
+        console.log(`Uploaded block ${i + 1}/${blocks.length}`);
+      }
+
+      console.log("UF2 upload complete!");
+    } catch (error) {
+      console.error("Error uploading UF2:", error);
+    }
+  };
+
   </script>
   <style scoped>
   /* Neon Colors */

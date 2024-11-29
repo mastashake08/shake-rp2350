@@ -71,9 +71,59 @@ export function useIOT() {
     console.log('Disconnected from directory.');
   };
 
+   /**
+   * Parse a .uf2 file and extract blocks.
+   * @param {ArrayBuffer} fileBuffer - The UF2 file as an ArrayBuffer.
+   * @returns {Uint8Array[]} - An array of UF2 blocks.
+   */
+   const parseUF2File = (fileBuffer) => {
+    const blocks = [];
+    const view = new DataView(fileBuffer);
+    const blockSize = 512; // UF2 blocks are 512 bytes each.
+
+    for (let offset = 0; offset < fileBuffer.byteLength; offset += blockSize) {
+      const block = new Uint8Array(fileBuffer, offset, blockSize);
+      blocks.push(block);
+    }
+
+    return blocks;
+  };
+
+  /**
+   * Upload a .uf2 file to the RP2350.
+   * @param {File} uf2File - The .uf2 file to upload.
+   */
+  const uploadUF2 = async (device,uf2File) => {
+    if (!device.value) {
+      console.error("Device is not connected.");
+      return;
+    }
+
+    try {
+      // Read the .uf2 file and parse blocks.
+      const fileBuffer = await uf2File.arrayBuffer();
+      const blocks = parseUF2File(fileBuffer);
+
+      console.log(`Parsed ${blocks.length} UF2 blocks.`);
+
+      // Send each block to the device.
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
+        await device.value.transferOut(1, block); // Endpoint 1 for writing
+        console.log(`Uploaded block ${i + 1}/${blocks.length}`);
+      }
+
+      console.log("UF2 upload complete!");
+    } catch (error) {
+      console.error("Error uploading UF2:", error);
+    }
+  };
+
   return {
     connect,
     uploadBinary,
     disconnect,
+    uploadUF2,
+    parseUF2File
   };
 }
